@@ -1,20 +1,21 @@
-#include <stdbool.h>
-#include <stddef.h>
 #include <stdint.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <stdbool.h>
 
 // Interpreter state
 struct BFState {
-  // The array and the size of the array.
-  size_t array_len;
-  uint8_t* array;
+    // The array and the size of the array.
+    size_t array_len;
+    uint8_t* array;
 
-  // Pointer to the current position, points into array..array+array_len.
-  uint8_t* cur;
+    // Pointer to the current position in the array; array <= cur < (array+array_len)
+    uint8_t* cur;
 };
 
+// Return 0 on success, and -1 in case of an error (e.g., an out-of-bounds access).
 int brainfuck(struct BFState* state, const char* program) {
-  // TODO: your implementation. :)
-  int pc = 0;
+    int pc = 0;
   int bracketCounter = 0;
   int pcTemp = 0;
   bool bracketFlag = false;
@@ -107,4 +108,31 @@ int brainfuck(struct BFState* state, const char* program) {
   } else {
       return 0;
   }
+}
+
+int main(int argc, char** argv) {
+    if (argc != 2) {
+        fprintf(stderr, "usage: %s <bfprog>\n", argv[0]);
+        return EXIT_FAILURE;
+    }
+
+    size_t array_len = 3000;
+    uint8_t* array = calloc(array_len, sizeof(uint8_t));
+    if (!array) {
+        fprintf(stderr, "could not allocate memory\n");
+        return EXIT_FAILURE;
+    }
+
+    struct BFState state = {
+        .array_len = array_len,
+        .array = array,
+        .cur = array,
+    };
+    int res = brainfuck(&state, argv[1]);
+    if (res) {
+        puts("an error occured");
+        return EXIT_FAILURE;
+    }
+
+    return EXIT_SUCCESS;
 }
